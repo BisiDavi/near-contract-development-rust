@@ -14,7 +14,8 @@ impl Marketplace{
     #[init]
     pub fn init() -> Self {
         Self {
-            products: UnorderedMap::new(b"product".to_vec())
+            // key "pdt" = product
+            products: UnorderedMap::new(b"pdt".to_vec())
         }
     }
 
