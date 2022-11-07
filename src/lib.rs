@@ -1,11 +1,12 @@
 use near_sdk::collections::UnorderedMap;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{near_bindgen, PanicOnDefault};
+use near_sdk::{env, AccountId, near_bindgen, PanicOnDefault};
+use near_sdk::serde::{Serialize, Deserialize};
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Marketplace {
-    products: UnorderedMap<String, String>
+    listed_products: UnorderedMap<String, Product>
 }
 
 #[near_bindgen]
@@ -19,6 +20,16 @@ pub struct Product {
     price:String,
     owner: AccountId,
     sold:u32
+}
+
+impl Product {
+    pub fn from_payload(payload:Payload) -> Self {
+        Self { id: payload.id, name:payload.name, description: payload.description, image: payload.image, location: payload.location, price: payload.price, owner:env::signer_account_id(), sold: 0 }
+    }
+
+    pub fn increment_sold_amont(&mut self){
+        self.sold = self.sold + 1;
+    }
 }
 
 #[near_bindgen]
@@ -37,22 +48,22 @@ impl Marketplace{
     #[init]
     pub fn init() -> Self {
         Self {
-            // key "pdt" = product
-            products: UnorderedMap::new(b"pdt".to_vec())
+            // key "l_pdt" = listed_products
+            listed_products: UnorderedMap::new(b"l_pdt".to_vec())
         }
     }
 
-    pub fn set_product(&mut self, id:String, product_name:String){
-        self.products.insert(&id, &product_name);
+    pub fn set_product(&mut self,  payload:Payload){
+        let product = Product::from_payload(payload);
+        self.listed_products.insert(&product.id, &product);
     }
 
-    pub fn get_product(&self, id: &String) -> Option<String>{
-        self.products.get(id)
+    pub fn get_product(&self, id: &String) -> Option<Product>{
+        self.listed_products.get(id)
+    }
+
+    pub fn get_products(&self) -> Vec<Product>{
+        return self.listed_products.values_as_vector().to_vec();
     }
 }
 
-impl Product {
-    pub fn from_payload(payload:Payload) -> Self {
-        Self { id: payload.id, name:payload.name, description: payload.description, image: payload.image, location: payload.location, price: payload.price, owner:env::signerr_account_id(), sold: 0 }
-    }
-}
