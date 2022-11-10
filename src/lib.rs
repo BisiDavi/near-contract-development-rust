@@ -38,7 +38,7 @@ pub struct Payload {
     id:String,
     name:String,
     description:String,
-    image:String,
+    image:String,   
     location:String,
     price:String
 }
@@ -48,7 +48,7 @@ impl Marketplace{
     #[init]
     pub fn init() -> Self {
         Self {
-            // key "l_pdt" = listed_products
+            // key "l_pdt" = listed_products, byte literal b" "
             listed_products: UnorderedMap::new(b"l_pdt".to_vec())
         }
     }
